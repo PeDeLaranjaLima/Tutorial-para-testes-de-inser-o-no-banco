@@ -3,7 +3,7 @@
 # Passo 1 (Instalação do PostgreSQL):
 Instalar o postgrasql, pode ser via link: https://www.postgresql.org/download/
 Após a instalação e abertura do postgras, rodar o comando
-<services.msc> no cmd windows* ou <sudo service postgresql start> no terminal ubuntu.
+`services.msc` no cmd windows* ou `sudo service postgresql start` no terminal ubuntu.
 
 *Ele serve para verificar se o servidor está ativo, em caso afirmativo, siga para o *Passo 2*, se não, clique com botão direito → Start (Iniciar).
 
