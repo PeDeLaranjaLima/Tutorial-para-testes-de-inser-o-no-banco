@@ -1,5 +1,5 @@
 -- =============================================================================
--- 1. CRIAÇÃO DAS TABELAS -> Tive que ajustar o esquema
+-- 1. CRIAÇÃO DAS TABELAS
 -- =============================================================================
 
 CREATE TABLE area (
@@ -61,11 +61,6 @@ CREATE TABLE evento_cf (
     id_evento INT
 );
 
-/*-- (As tabelas evento_sp, evento_og, evento_cf e Entidades permanecem iguais ao esquema da Erika)
-CREATE TABLE evento_sp (id_evento_sp SERIAL PRIMARY KEY, soc_inicial INT, soc_final INT, taxa INT, total_frames_faltantes INT, id_evento INT);
-CREATE TABLE evento_og (id_evento_og INT PRIMARY KEY, link_og VARCHAR, id_evento INT);
-CREATE TABLE evento_cf (id_evento_cf SERIAL PRIMARY KEY, id_evento INT);*/
-
 -- =============================================================================
 -- 2. RESTRIÇÕES DE CHAVE ESTRANGEIRA
 -- =============================================================================
@@ -79,7 +74,7 @@ ALTER TABLE evento_og ADD FOREIGN KEY(id_evento) REFERENCES evento (id_evento);
 ALTER TABLE evento_cf ADD FOREIGN KEY(id_evento) REFERENCES evento (id_evento);
 
 -- =============================================================================
--- Carregar com dados reais (METADADOS.csv)
+-- 3. Carregar com dados reais (METADADOS.csv)
 -- =============================================================================
 
 -- Preparação da Staging -> armazenamento temporário
@@ -90,7 +85,7 @@ CREATE TEMP TABLE staging_metadados (
     station TEXT, lat TEXT, long TEXT
 );
 
-COPY staging_metadados FROM 'C:\Program Files\PostgreSQL\18\data\METADADOS.csv' 
+COPY staging_metadados FROM 'C:\Program Files\PostgreSQL\18\data\METADADOS.csv' -- Alterar caminho conforme necessário
 WITH (FORMAT csv, HEADER true, DELIMITER E'\t', ENCODING 'UTF8');
 
 -- Popular ÁREA
@@ -136,11 +131,12 @@ JOIN localizacao l ON l.id_unidade_federativa = uf.id_unidade_federativa
     AND l.latitude = REPLACE(REGEXP_REPLACE(s.lat, '[^0-9,.-]', '', 'g'), ',', '.')::float
     AND l.longitude = REPLACE(REGEXP_REPLACE(s.long, '[^0-9,.-]', '', 'g'), ',', '.')::float;
 
-
 -- =============================================================================
--- 4. IMPORTAR EVENTOS.csv
---    O CSV original tem DUAS linhas de cabecalho. Usamos o arquivo ja limpo
---    em /tmp/EVENTOS_clean.csv (geramos com tail -n +3).
+-- 4. Carregar com dados reais (EVENTOS.csv)
+-- =============================================================================
+-- =============================================================================
+--    IMPORTAR EVENTOS.csv: O CSV original tem DUAS linhas de cabecalho. Usamos o
+--    arquivo ja limpo em /tmp/EVENTOS_clean.csv (geramos com tail -n +3).
 -- =============================================================================
 
 DROP TABLE IF EXISTS staging_eventos;
@@ -157,7 +153,7 @@ CREATE TEMP TABLE staging_eventos (
 );
 
 COPY staging_eventos
-FROM 'C:\Program Files\PostgreSQL\18\data\EVENTOS.csv'
+FROM 'C:\Program Files\PostgreSQL\18\data\EVENTOS.csv' -- Alterar caminho conforme necessário
 WITH (
     FORMAT csv,
     DELIMITER ',',
@@ -177,7 +173,7 @@ DECLARE
 BEGIN
     FOR r IN
         SELECT * FROM staging_eventos
-        WHERE agente IS NOT NULL AND agente <> '' AND idx <> '#'
+        WHERE agente IS NOT NULL AND agente <> '' AND idx <> '#' -- Adicionada a opção de ignorar #
         ORDER BY NULLIF(idx, '')::int
     LOOP
         SELECT id_terminal INTO v_id_terminal
